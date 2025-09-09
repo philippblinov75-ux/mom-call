@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Звонок маме</title>
+</head>
+<body>
+<script>
+  // Фиксированная "мамина" комната
+  const MOM_ROOM = "Philipp_Mom_Call_Room";
+
+  // Параметры Jitsi для простоты
+  const JITSI_PARAMS = [
+    "config.disableDeepLinking=true",
+    "config.prejoinPageEnabled=false",
+    "config.requireDisplayName=false",
+    "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true"
+  ].join("&");
+
+  // Ссылка на Jitsi
+  const url = `https://meet.jit.si/${encodeURIComponent(MOM_ROOM)}#${JITSI_PARAMS}&userInfo.displayName=${encodeURIComponent("Мама")}`;
+
+  // Автоматический переход
+  window.location.replace(url);
+</script>
+</body>
+</html>
