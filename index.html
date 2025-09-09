@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Позвонить сыну</title>
+  <style>
+    html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background:#0b1220; color:#fff; }
+    .wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px; text-align:center; }
+    button { background:#3b82f6; color:#fff; border:none; padding:20px 30px; font-size:24px; border-radius:12px; cursor:pointer; }
+    iframe { position:fixed; inset:0; width:100vw; height:100vh; border:0; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="landing">
+    <h1>Позвонить сыну</h1>
+    <p>Нажмите кнопку и разрешите доступ к <b>микрофону</b> и <b>камере</b>.</p>
+    <button id="callBtn">Позвонить</button>
+  </div>
+  <iframe id="callFrame" class="hidden" allow="camera; microphone"></iframe>
+  <script>
+    const ROOM = "SonCall-j5aHePU2";
+    const JITSI = "https://meet.jit.si/";
+    const HASH = "#config.prejoinPageEnabled=false&userInfo.displayName=%D0%9C%D0%B0%D0%BC%D0%B0";
+    const url = JITSI + encodeURIComponent(ROOM) + HASH;
+
+    const frame = document.getElementById('callFrame');
+    const landing = document.getElementById('landing');
+    document.getElementById('callBtn').onclick = () => {
+      frame.src = url;
+      frame.classList.remove('hidden');
+      landing.classList.add('hidden');
+    };
+  </script>
+</body>
+</html>
