@@ -1,78 +1,75 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Позвонить сыну</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Звонок маме — без регистрации</title>
   <style>
-    html, body { margin:0; padding:0; height:100%;
-      background:#0b1220; color:#fff;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    #app { height:100%; display:flex; align-items:stretch; justify-content:center; }
-    #jitsi { width:100%; height:100%; }
-    .fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; text-align:center; }
-    .hidden { display:none; }
-    a { color:#7aa2ff; }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;background:#0b0b0b;color:#fff}
+    .card{width:min(680px,92vw);padding:28px 22px;border-radius:18px;background:#141414;box-shadow:0 10px 30px rgb(0 0 0 / 35%)}
+    h1{margin:0 0 8px;font-size:26px}
+    p.lead{margin:0 0 18px;color:#bdbdbd}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .btn{flex:1 1 260px;cursor:pointer;border:0;padding:16px;border-radius:14px;font-size:17px}
+    .primary{background:#4ade80;color:#0b0b0b;font-weight:700}
+    .secondary{background:#2a2a2a;color:#fff}
+    .hint{margin-top:14px;color:#9aa0a6;font-size:14px;line-height:1.35}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .small{font-size:13px;color:#9aa0a6;margin-top:10px}
   </style>
 </head>
 <body>
-  <div id="app">
-    <div id="jitsi"></div>
-    <div id="fallback" class="fallback hidden">
-      <div>
-        <h1>Подключаемся к звонку…</h1>
-        <p>Если долго не открывается, нажмите: <a id="directLink" href="#">Открыть звонок напрямую</a></p>
+  <div class="wrap">
+    <div class="card">
+      <h1>Звонок маме — одним нажатием</h1>
+      <p class="lead">Без Google/GitHub, просто ссылка. Камера/микрофон — по запросу браузера.</p>
+
+      <div class="row">
+        <button class="btn primary" id="btn-mom">Позвонить маме</button>
+        <button class="btn secondary" id="btn-new">Создать новую ссылку</button>
+      </div>
+
+      <div class="hint">
+        <div><b>Совет:</b> Ссылку «для мамы» держим постоянной — закрепи её в чате/ярлыке на телефоне.</div>
+        <div class="small">Используем <span class="mono">meet.jit.si</span>. Предджоин вырублен, чтобы не путать пользователя.</div>
       </div>
     </div>
   </div>
 
   <script>
-    // Имя комнаты (можно оставить как есть)
-    const ROOM = "SonCall-gvdSqYHlyE";
-    const DOMAIN = "meet.jit.si";
+    // 1) Постоянная «мамина» комната. Можно переименовать на свой вкус.
+    const MOM_ROOM = "Philipp_Mom_Call_Room";
 
-    // Запасная прямая ссылка на комнату (без экранов приложения)
-    const directUrl = "https://" + DOMAIN + "/" + encodeURIComponent(ROOM) +
-      "#config.prejoinPageEnabled=false&config.disableDeepLinking=true";
-    document.getElementById('directLink').href = directUrl;
+    // Базовые параметры, чтобы не выпрыгивало «Откройте в приложении» и не было лишних экранов.
+    const JITSI_PARAMS = [
+      "config.disableDeepLinking=true",     // держимся в браузере
+      "config.prejoinPageEnabled=false",    // сразу в комнату
+      "config.requireDisplayName=false",    // не спрашивать имя
+      "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true"
+    ].join("&");
 
-    // Запускаем встроенное окно Jitsi без лишних экранов/регистрации
-    function start() {
-      if (!window.JitsiMeetExternalAPI) {
-        document.getElementById('fallback').classList.remove('hidden');
-        return;
-      }
-      const parent = document.getElementById('jitsi');
-      const api = new JitsiMeetExternalAPI(DOMAIN, {
-        roomName: ROOM,
-        parentNode: parent,
-        userInfo: { displayName: "Мама" },
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          disableDeepLinking: true
-        },
-        interfaceConfigOverwrite: {
-          MOBILE_APP_PROMO: false,
-          HIDE_INVITE_MORE_HEADER: true,
-          DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-          TOOLBAR_ALWAYS_VISIBLE: true,
-          // Оставляем только нужные кнопки
-          TOOLBAR_BUTTONS: ["microphone","camera","hangup","tileview","fullscreen"]
-        }
-      });
+    function jitsiUrl(room, displayName) {
+      // displayName в URL через фрагментный параметр userInfo.displayName
+      const nameParam = displayName ? `&userInfo.displayName=${encodeURIComponent(displayName)}` : "";
+      return `https://meet.jit.si/${encodeURIComponent(room)}#${JITSI_PARAMS}${nameParam}`;
     }
 
-    // Подключаем API и стартуем
-    (function load() {
-      const s = document.createElement('script');
-      s.src = "https://meet.jit.si/external_api.js";
-      s.onload = start;
-      s.onerror = () => document.getElementById('fallback').classList.remove('hidden');
-      document.body.appendChild(s);
-    })();
+    // Кнопка «Позвонить маме» — открываем фиксированную комнату, имя «Мама»
+    document.getElementById("btn-mom").onclick = () => {
+      window.location.href = jitsiUrl(MOM_ROOM, "Мама");
+    };
+
+    // Кнопка «Создать новую ссылку» — генерим комнату и даём тебе выбрать: открыть или скопировать
+    document.getElementById("btn-new").onclick = async () => {
+      const randomRoom = "Call_" + Math.random().toString(36).slice(2, 10).toUpperCase();
+      const url = jitsiUrl(randomRoom, "Филипп");
+      const choice = confirm(`Создана комната:\n\n${url}\n\nОК — открыть сейчас\nОтмена — только скопировать в буфер обмена`);
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {}
+      if (choice) window.location.href = url;
+    };
   </script>
 </body>
 </html>
-
